@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load cart %}
+
+<!-- Main Container -->
+<div class="container mt-5">
+    <div class="row">
+
+        <!-- Sidebar Filters -->
+        <aside class="col-lg-3">
+            <h5 class="mb-3">Categories</h5>
+            <div class="list-group shadow-sm">
+                <a href="/" class="list-group-item list-group-item-action">All Products</a>
+                {% for category in category %}
+                <a href="/?category={{ category.id }}" class="list-group-item list-group-item-action {% if category.is_active %}active{% endif %}">
+                    {{ category.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </aside>
+
+        <!-- Products Section -->
+        <main class="col-lg-9">
+            <!-- Header -->
+            <h5 class="mb-4">All Products</h5>
+
+            <!-- Products Grid -->
+            <div class="row g-4">
+                {% for product in products %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm h-100" style="max-width: 280px;">
+                        <!-- Product Image -->
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 300px; object-fit: cover;">
+
+                        <!-- Card Body -->
+                        <div class="card-body text-center">
+                            <h6 class="card-title text-truncate">{{ product.name }}</h6>
+                            <p class="text-muted mb-1">₹ {{ product.price }}</p>  <!-- Price with ₹ symbol -->
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="card-footer bg-light border-0 text-center">
+                            {% if product|is_in_cart:request.session.cart %}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <form action="/#{{ product.id }}" method="post">
+                                    {% csrf_token %}
+                                    <input hidden type="text" name="product" value="{{ product.id }}">
+                                    <input hidden type="text" name="remove" value="True">
+                                    <button class="btn btn-outline-danger btn-sm">−</button>
+                                </form>
+                                <span>{{ product|cart_quantity:request.session.cart }} in Cart</span>
+                                <form action="/#{{ product.id }}" method="post">
+                                    {% csrf_token %}
+                                    <input hidden type="text" name="product" value="{{ product.id }}">
+                                    <button class="btn btn-outline-success btn-sm">+</button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <form action="/#{{ product.id }}" method="post">
+                                {% csrf_token %}
+                                <input hidden type="text" name="product" value="{{ product.id }}">
+                                <button class="btn btn-primary btn-sm w-100">Add to Cart</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+
+    </div>
+</div>
+
+{% endblock %}
